@@ -246,6 +246,22 @@ def main(args):
 
     print("Creating model")
     model = torchvision.models.get_model(args.model, weights=args.weights, num_classes=num_classes)
+
+    # ================== 新增修改部分 ==================
+    if args.model == 'resnet18':
+        # 1. 替换第一层卷积：7x7 stride=2 替换为 3x3 stride=1
+        model.conv1 = nn.Conv2d(
+            in_channels=3,
+            out_channels=64,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False
+        )
+        # 2. 去除第一层 maxpool：将其替换为空操作 (Identity)
+        model.maxpool = nn.Identity()
+    # ==================================================
+
     model.to(device)
 
     if args.distributed and args.sync_bn:
